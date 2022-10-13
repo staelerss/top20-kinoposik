@@ -1,5 +1,5 @@
 <?php
-function getAtribute($file, $pattern) {
+function getAtribute($file, $pattern) { // Функция парсинга кинопоиска по заданным патернам
 	preg_match_all($pattern, $file, $res);
 	return $res[0];
 }
@@ -14,9 +14,9 @@ $patternRating = '#<span class="styles_kinopoiskValuePositive__vOb2E styles_kino
 $patternYear = '#<span class="desktop-list-main-info_secondaryText__M_aus(.+?)</span>#su'; // Паттерн поиска года выхода фильма
 $patternDirector = '#<span class="desktop-list-main-info_truncatedText__IMQRP(.+?)</span>#su'; // Паттерн поиска режисёра фильма
 
-$names = getAtribute($file, $patternName);
-$ratings = getAtribute($file, $patternRating);
-$years = getAtribute($file, $patternYear);
+$names = getAtribute($file, $patternName); // Названия фильмов
+$ratings = getAtribute($file, $patternRating); // Рейтинги фильмов
+$years = getAtribute($file, $patternYear); // Года выхода фильмов
 $directors = getAtribute($file, $patternDirector); // Использовать только чётные значения    VVV
 
 $directors = array_map('array_shift', array_chunk($directors, 2)); // Берёт каждое чётное значение
@@ -34,25 +34,25 @@ for ($i = 0; $i < 20; $i++) { // Костыль по вырезке YEARS и DIR
 	$directors[$i] = substr($directors[$i], ($entryPointDirector + 1));
 }
 
-var_export ($names);
-echo ("<br>");
-echo ("<br>");
-var_export ($ratings);
-echo ("<br>");
-echo ("<br>");
-var_export ($years);
-echo ("<br>");
-echo ("<br>");
-var_export ($directors);
-echo ("<br>");
-echo ("<br>");
+// var_export ($names);
+// echo ("<br>");
+// echo ("<br>");
+// var_export ($ratings);
+// echo ("<br>");
+// echo ("<br>");
+// var_export ($years);
+// echo ("<br>");
+// echo ("<br>");
+// var_export ($directors);
+// echo ("<br>");
+// echo ("<br>");
 
-$conn = new mysqli("127.0.0.1", "st", "password", "kpDB");
+$conn = new mysqli("127.0.0.1", "st", "password", "kpDB"); // Подключение к БД
 if($conn->connect_error){
    die("Connection failed: " . $conn->connect_error);
 }
 
-$conn->query(
+$conn->query( // Создание таблицы "Movies", если она не существует
 	"CREATE TABLE IF NOT EXISTS movies(
 		id INT PRIMARY KEY AUTO_INCREMENT,
 		movieName VARCHAR(100), 
@@ -62,9 +62,9 @@ $conn->query(
 		dateAdded DATE
 		)"
 	);
-$stmt = $conn->prepare("INSERT INTO movies (movieName, rating, yearCreation, director, dateAdded) VALUES (?,?,?,?,NOW())");
-
-for ($l = 0; $l < 20; $l++){
+$stmt = $conn->prepare("INSERT INTO movies (movieName, rating, yearCreation, director, dateAdded) 
+						VALUES (?,?,?,?,NOW())"); // Prepared statement для загрузки данных в БД
+for ($l = 0; $l < 20; $l++){ // Выполнение prepared statment'а (сейчас не работает)
 	$movie = $names[l];
 	$rating = $ratings[l];
 	$yearCreation = $years[l];
@@ -76,6 +76,6 @@ for ($l = 0; $l < 20; $l++){
 	echo ("Error: %s.\n" . $stmt->error . "</br>");	
 }
 
-$stmt->close();
-$conn->close();
+$stmt->close(); // Закрытие потока prepared statement
+$conn->close(); // Закрытие потока связи с БД
 
