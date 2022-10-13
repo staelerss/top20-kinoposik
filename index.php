@@ -34,44 +34,48 @@ for ($i = 0; $i < 20; $i++) { // Костыль по вырезке YEARS и DIR
 	$directors[$i] = substr($directors[$i], ($entryPointDirector + 1));
 }
 
-// print_r ($names);
-// echo ("<br>");
-// echo ("<br>");
-// print_r ($ratings);
-// echo ("<br>");
-// echo ("<br>");
-// print_r ($years);
-// echo ("<br>");
-// echo ("<br>");
-// print_r($directors);
+var_export ($names);
+echo ("<br>");
+echo ("<br>");
+var_export ($ratings);
+echo ("<br>");
+echo ("<br>");
+var_export ($years);
+echo ("<br>");
+echo ("<br>");
+var_export ($directors);
+echo ("<br>");
+echo ("<br>");
 
 $conn = new mysqli("127.0.0.1", "st", "password", "kpDB");
+if($conn->connect_error){
+   die("Connection failed: " . $conn->connect_error);
+}
+
 $conn->query(
 	"CREATE TABLE IF NOT EXISTS movies(
 		id INT PRIMARY KEY AUTO_INCREMENT,
-		movieName VARCHAR(100) NOT NULL, 
-		rating FLOAT NOT NULL,
-		yearCreation INT NOT NULL, 
-		director VARCHAR(50) NOT NULL,
-		dateAdded DATE NOT NULL
+		movieName VARCHAR(100), 
+		rating FLOAT,
+		yearCreation INT, 
+		director VARCHAR(50),
+		dateAdded DATE
 		)"
 	);
+$stmt = $conn->prepare("INSERT INTO movies (movieName, rating, yearCreation, director, dateAdded) VALUES (?,?,?,?,NOW())");
 
+for ($l = 0; $l < 20; $l++){
+	$movie = $names[l];
+	$rating = $ratings[l];
+	$yearCreation = $years[l];
+	$director = $directors[l];
+	$stmt->bind_param("sdisb", $movie, $rating, $yearCreation, $director, $dateAdded);
+	$stmt->execute();
 
-
-for ($i = 0; $i < 20; $i++) {
-	$sql = "INSERT INTO movies(movieName, rating, yearCreation, director, dateAdded) 
-VALUES ($names[$i],$ratings[$i],$years[$i],$directors[$i],NOW())";
-	if ($conn->query($sql) === TRUE) {
-		echo "New record created successfully";
-	} else {
-		echo "Error: " . $sql . "<br>" . $conn->error;
-	}
+	// echo ($movie . "</br>");
+	echo ("Error: %s.\n" . $stmt->error . "</br>");	
 }
 
-// if($conn->connect_error){
-//    echo "Connnection error";
-// }
-// echo "Подключение успешно установлено";
+$stmt->close();
 $conn->close();
 
