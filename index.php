@@ -57,13 +57,20 @@ $conn->query(
 		)"
 	);
 
+
+
 for ($i = 0; $i < 20; $i++) {
-	$conn->query("INSERT INTO movies(movieName, rating, yearCreation, director, dateAdded) 
-				  VALUES (" . $names[$i] . ", " . $ratings[$i] . ", " . $years[$i] . ", " . $directors[$i] . ", NOW()");
+	$sql = "INSERT INTO movies(movieName, rating, yearCreation, director, dateAdded) 
+VALUES ($names[$i],$ratings[$i],$years[$i],$directors[$i],NOW())";
+	if ($conn->query($sql) === TRUE) {
+		echo "New record created successfully";
+	} else {
+		echo "Error: " . $sql . "<br>" . $conn->error;
+	}
 }
 
 // if($conn->connect_error){
-//     die("Ошибка: " . $conn->connect_error);
+//    echo "Connnection error";
 // }
 // echo "Подключение успешно установлено";
 $conn->close();
